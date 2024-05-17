@@ -1,4 +1,7 @@
-
+@font-face {
+    font-family : afterkilly;
+    src : url(art/afterkilly.ttf);
+}
 html {
     padding : 0;
     background-color : black;
@@ -249,21 +252,30 @@ body {
     background-repeat : no-repeat;
 }
 
-#game .fps {
+#game .fps, 
+#game .logDisplay {
     position : absolute;
-    display : none;
     z-index : 1000;
-    left : 20px;
-    top : 15px;
     font-family : courier new;
     font-size : 16px;
-    width : 70px;
-    height : 16px;
-    background : rgba(0,0,0,0.3);
-    color : rgb(200,200,200);
-    padding : 5px;
+    color : #eee;
+    padding : 0;
 }
 
+#game .fps {
+    display : none;
+    left : 15px;
+    top : 8px;
+    width : 60px;
+    background : rgba(0,0,0,0.3);
+    text-align : right;
+}
+
+#game .logDisplay {
+    top : 311px;
+    width: 100%;
+    text-align : center;
+}
 
 #text-screen {
     background-color : #8a0000;
@@ -443,6 +455,10 @@ body {
 #menu div.menu {
     width : 100%;
     height : 100%;
+    font-family : "Press Start 2P", "Courier New", monospace;
+    font-size : 22px;
+    font-weight : bold;
+    color : #8e8e8e;
 }
 
 #menu div.menu.main {
@@ -462,16 +478,95 @@ body {
 }
 
 
-#menu div.menu.sound {
-    background-image : url(art/menubg_sound.png);
+#menu div.menu.sound, #menu div.menu.control, #menu div.menu.other {
+    background-image : url(art/menubg.png);
 }
 
-#menu div.menu.control {
-    background-image : url(art/menubg_control.png);
-}
 
 #menu div.menu.customize {
     background-image : url(art/menubg_customize.png);
+}
+
+#menu .settings-container {
+    background : #590000;
+    position : relative;
+    width : 500px;
+    height : 240px;
+    border : 3px inset #b90000;
+    top : 25px;
+    left : 70px;
+}
+
+#menu .settings-container li {
+    padding-top : 20px;
+    position : relative;
+    left : -40px;
+}
+
+#menu .option {
+    background : #aaa;
+    color : #555;
+    margin : 2px 0;
+    padding-top : 2px;
+    border : 2px outset #ccc;
+    width : 260px;
+    display : block;
+    margin : auto;
+    text-align : center;
+    font-size : 18px;
+    font-weight : 900;
+    left : 10px;
+    position : relative;
+}
+
+#menu div.plack {
+    background : -webkit-linear-gradient(88deg, #fff 0%, #f00 30%, #f00 34%, #500 48%, #000 50%, #000 51%, #fff 54%, #fff 55%, #ddd 57%, #333 100%);
+    -webkit-background-clip : text;
+    color : transparent;
+    filter : drop-shadow(1px 2px 0.4px #666);
+    font-size : 78px;
+    font-family : 'afterkilly', serif;
+    letter-spacing : 1.5px;
+    text-align : center;
+    position : relative;
+    top : 18px;
+}
+
+#menu input[type=range] {
+    -webkit-appearance : none;
+    appearance : none;
+    width : 400px;
+    height : 2px;
+    outline : none;
+    position : relative;
+    background : transparent;
+    top : -5px;
+}
+
+#menu li.active input[type=range] {
+    height : 4px; /* Increase the height on active */
+    top : -4px;
+}
+#menu li.active label.option {
+    color : #eee;
+}
+
+#menu input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance : none;
+    background-image : url('art/menulsm.png');
+    width : 42px;
+    height : 16px;
+    cursor : pointer;
+}
+
+#menu input[type=range]::-moz-range-thumb {
+    background-image: url('art/menulsm.png');
+    background-color: transparent;
+    border-radius: 0;
+    border: 0;
+    width: 42px;
+    height: 16px;
+    cursor: pointer;
 }
 
 #menu ul {
@@ -489,10 +584,24 @@ body {
 }
 
 #menu div.menu.sound ul {
-    left : 150px;
-    top : 87px;
+    left : 110px;
+    top : 10px;
     width : 330px;
-    height : 232px;
+}
+
+#menu div.menu.control ul,
+#menu div.menu.other ul {
+    left : 110px;
+    top : 10px;
+    width : 400px;
+}
+
+#menu div.menu ul.selector li {
+    position : relative;
+}
+
+#menu div.menu ul.selector li:has(.light) {
+    left : 0;
 }
 
 #menu div.menu.episodes ul {
@@ -517,12 +626,6 @@ body {
     height : 240px;
 }
 
-#menu div.menu.control ul {
-    left : 160px;
-    top : 156px;
-    width : 350px;
-    height : 100px;
-}
 
 #menu div.menu.customize ul {
     left : 116px;
@@ -532,56 +635,37 @@ body {
 }
 
 
-#menu ul.two-column{
-    position : relative;
-    float : left;
-    width : 256px;
+#menu ul.two-column {
+    columns : 2;
+    column-gap : 256px;
 }
 
-/* menu items */ 
+/* menu items */
 
-#menu ul li div.button {
+#menu ul li div {
     display : block;
     height : 24px;
     cursor : pointer;
     margin-bottom : 8px;
+}
+
+#menu li.active {
+    color : #c3c3c3;
+}
+
+#menu ul li div.button {
     background-image : url(art/menuitems.png);
 }
 
-#menu li.newgame div.button {
-    background-position : 0 0;
-}
-#menu li.active.newgame div.button {
-    background-position : -384px 0;
+
+#menu li.resumegame div {
+    color : #b6ae1d;
 }
 
-#menu li.sound div.button {
-    background-position : 0 -32px;
-}
-#menu li.active.sound div.button {
-    background-position : -384px -32px;
+#menu li.active.resumegame div {
+    color : #fff72e;
 }
 
-#menu li.control div.button {
-    background-position : 0 -64px;
-}
-#menu li.active.control div.button {
-    background-position : -384px -64px;
-}
-
-#menu li.readthis div.button {
-    background-position : 0 -96px;
-}
-#menu li.active.readthis div.button {
-    background-position : -384px -96px;
-}
-
-#menu li.resumegame div.button {
-    background-position : 0 -128px;
-}
-#menu li.active.resumegame div.button {
-    background-position : -384px -128px;
-}
 
 #menu li.baby div.button {
     background-position : 0 -160px;
@@ -611,50 +695,6 @@ body {
     background-position : -384px -256px;
 }
 
-#menu li.sfxoff {
-    margin-bottom : 58px;
-}
-
-#menu li.sfxon div.button,
-#menu li.musicon div.button,
-#menu li.sfxoff div.button,
-#menu li.musicoff div.button {
-    margin-left : 48px;
-    width : 256px;
-}
-
-
-#menu li.sfxon div.button,
-#menu li.musicon div.button {
-    background-position : 0 -288px;
-}
-#menu li.active.sfxon div.button,
-#menu li.active.musicon div.button {
-    background-position : -384px -288px;
-}
-
-#menu li.sfxoff div.button,
-#menu li.musicoff div.button {
-    background-position : 0 -320px;
-}
-#menu li.active.sfxoff div.button,
-#menu li.active.musicoff div.button {
-    background-position : -384px -320px;
-}
-
-#menu li.mouseenabled div.button {
-    background-position : 0 -352px;
-}
-#menu li.active.mouseenabled div.button {
-    background-position : -384px -352px;
-}
-#menu li.customize div.button {
-    background-position : 0 -384px;
-}
-#menu li.active.customize div.button {
-    background-position : -384px -384px;
-}
-
 #menu div.menu.episodes ul {
 	height:230px;
 	width:570px;
@@ -665,7 +705,7 @@ body {
 #menu div.menu.episodes li div.button {
     height : 56px;
     width : 550px;
-    background-image : url(art/menuitems_episodes.png);
+    background-image : url(art/menuitems_episodes_lightside.png);
 }
 
 #menu div.menu.episodes li.episode-0 div.button {
@@ -798,15 +838,18 @@ body {
     margin-top : 4px;
     overflow : hidden;
     display : inline-block;
-    background-image : url(art/menulight.png);
+    background-image : url(art/menulsm.png);
+    background-color : #222;
+    top : 4px;
+    position : relative;
+    margin-right : 6px;
 }
 
 #menu div.light.on {
-    background-position : 0 24px;
+    background-color : #ff0;
 }
 
 /* menu selector gun */
-
 #menu ul.selector li.active::before {
     display : block;
     width : 46px;
@@ -817,16 +860,24 @@ body {
     background-image : url(art/menuselector.png);
 }
 
+#menu div.menu.sound li.active::before {
+    top : 30px;
+}
 
-#menu div.menu.control ul.selector li.active::before {
+#menu div.menu.control li.active::before,
+#menu div.menu.other li.active::before {
+    left : -60px;
+}
+
+#menu div.menu li:has(.light).active::before {
     left : -100px;
+    top : 26px;
 }
 
 
 /* customize keys menu */
-
 #menu div.menu.customize ul.selector li.active::before {
-    left : -96px;
+    left : -80px;
 }
 #menu div.menu.customize li div.button {
     margin-bottom : 28px;
@@ -839,21 +890,9 @@ body {
     width : 122px;
     height : 28px;
     background-image : url(art/control_keys.png);
-    background-position : 0 -128px;
-    margin-right : -6px;
-}
-#menu div.menu.customize li div.button span.k1 {
-}
-#menu div.menu.customize li div.button span.k2 {
-}
-#menu div.menu.customize li div.button span.k3 {
-}
-#menu div.menu.customize li div.button span.k4 {
+    margin-right : -24px;
 }
 
-#menu div.menu.customize li div.button span:hover {
-    
-}
 
 /* skill menu face */
 

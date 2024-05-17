@@ -5,13 +5,13 @@
 Wolf.ActorAI = (function() {
 
     var dsounds = [
-        "sfx/025.wav",
-        "sfx/026.wav",
-        "sfx/086.wav",
-        "sfx/088.wav",
-        "sfx/105.wav",
-        "sfx/107.wav",
-        "sfx/109.wav"
+        "sfx/025.ogg",
+        "sfx/026.ogg",
+        "sfx/086.ogg",
+        "sfx/088.ogg",
+        "sfx/105.ogg",
+        "sfx/107.ogg",
+        "sfx/109.ogg"
     ]; 
 
     /**
@@ -21,59 +21,60 @@ Wolf.ActorAI = (function() {
      * @param {object} game The game object.
      */
     function deathScream(self, game) {
-        var pos = game.player.position;
+        var plyr = game.player;
+        console.log("deathScream: "+self.type);
         
         switch (self.type) {
             case Wolf.en_mutant:  //added 0's to all of these in order to check if sounds are correct... gsh
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/037.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/037.ogg", plyr, self);
                 break;
 
             case Wolf.en_guard:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, dsounds[Wolf.Random.rnd() % 6], 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound(dsounds[Wolf.Random.rnd() % 6], plyr, self);
                 break;
 
             case Wolf.en_officer:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/074.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/074.ogg", plyr, self);
                 break;
 
             case Wolf.en_ss:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/046.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/046.ogg", plyr, self);
                 break;
 
             case Wolf.en_dog:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/035.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/035.ogg", plyr, self);
                 break;
 
             case Wolf.en_boss:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/019.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/019.ogg", plyr, self);
                 break;
 
             case Wolf.en_schabbs:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/061.wav", 1, Wolf.ATTN_NORM, 0);            
+                Wolf.Sound.startSound("sfx/061.ogg", plyr, self);            
                 break;
 
             case Wolf.en_fake:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/069.wav", 1, Wolf.ATTN_NORM, 0);            
+                Wolf.Sound.startSound("sfx/069.ogg", plyr, self);            
                 break;
 
             case Wolf.en_mecha:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/084.wav", 1, Wolf.ATTN_NORM, 0);            
+                Wolf.Sound.startSound("sfx/084.ogg", plyr, self);            
                 break;
 
             case Wolf.en_hitler:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/044.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/044.ogg", plyr, self);
                 break;
 
             case Wolf.en_gretel:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/115.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/115.ogg", plyr, self);
                 break;
 
             case Wolf.en_gift:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/091.wav", 1, Wolf.ATTN_NORM, 0);            
+                Wolf.Sound.startSound("sfx/091.ogg", plyr, self);            
                 break;
 
             case Wolf.en_fat:
-                Wolf.Sound.startSound(pos, self, 1, Wolf.CHAN_VOICE, "sfx/119.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/119.ogg", plyr, self);
                 break;
         }
     }
@@ -88,7 +89,7 @@ Wolf.ActorAI = (function() {
      */
     function mechaSound(self, game) {
         if (game.level.state.areabyplayer[self.areanumber]) {
-            Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/080.wav", 1, Wolf.ATTN_NORM, 0);
+            Wolf.Sound.startSound("sfx/080.ogg", game.player, self);
         }
     }
 
@@ -99,7 +100,7 @@ Wolf.ActorAI = (function() {
      * @param {object} self The enemy actor object.
      */
     function slurpie(self, game) {
-        Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "lsfx/061.wav", 1, Wolf.ATTN_NORM, 0);
+        Wolf.Sound.startSound("lsfx/061.ogg", game.player, self);
     }
 
 
@@ -154,7 +155,7 @@ Wolf.ActorAI = (function() {
      * @param {object} self The enemy actor object.
      */
     function breathing(self) {
-        Wolf.Sound.startSound(null, null, 1, Wolf.CHAN_VOICE, "lsfx/080.wav", 1, Wolf.ATTN_NORM, 0);
+        Wolf.Sound.startSound("lsfx/080.ogg");
     }
 
     
@@ -302,12 +303,12 @@ Wolf.ActorAI = (function() {
     function firstSighting(self, game) {
         switch (self.type) {
             case Wolf.en_guard:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/001.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/001.ogg", game.player, self);
                 self.speed *= 3;    // go faster when chasing player
                 break;
 
             case Wolf.en_officer:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/071.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/071.ogg", game.player, self);
                 self.speed *= 5;    // go faster when chasing player
                 break;
 
@@ -316,52 +317,52 @@ Wolf.ActorAI = (function() {
                 break;
 
             case Wolf.en_ss:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/015.wav", 1, Wolf.ATTN_NORM, 0);    
+                Wolf.Sound.startSound("sfx/015.ogg", game.player, self);    
                 self.speed *= 4;            // go faster when chasing player
                 break;
 
             case Wolf.en_dog:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/002.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/002.ogg", game.player, self);
                 self.speed *= 2;            // go faster when chasing player
                 break;
 
             case Wolf.en_boss:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/017.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/017.ogg", game.player, self);
                 self.speed = Wolf.SPDPATROL * 3;    // go faster when chasing player
                 break;
 
             case Wolf.en_gretel:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/112.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/112.ogg", game.player, self);
                 self.speed *= 3;            // go faster when chasing player
                 break;
 
             case Wolf.en_gift:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/096.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/096.ogg", game.player, self);
                 self.speed *= 3;            // go faster when chasing player
                 break;
 
             case Wolf.en_fat:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/102.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/102.ogg", game.player, self);
                 self.speed *= 3;            // go faster when chasing player
                 break;
 
             case Wolf.en_schabbs:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/065.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/065.ogg", game.player, self);
                 self.speed *= 3;            // go faster when chasing player
                 break;
 
             case Wolf.en_fake:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/054.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/054.ogg", game.player, self);
                 self.speed *= 3;            // go faster when chasing player
                 break;
 
             case Wolf.en_mecha:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/040.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/040.ogg", game.player, self);
                 self.speed *= 3;            // go faster when chasing player
                 break;
 
             case Wolf.en_hitler:
-                Wolf.Sound.startSound(game.player.position, self, 1, Wolf.CHAN_VOICE, "sfx/040.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/040.ogg", game.player, self);
                 self.speed *= 5;            // go faster when chasing player
                 break;
 

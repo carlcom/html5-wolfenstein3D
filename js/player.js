@@ -86,7 +86,7 @@ Wolf.Player = (function() {
      * @param {object} [oldPlayer] A player object to copy score and weapons from
      * @returns {object} The new player object
      */
-    function spawn(location, level, skill, oldPlayer) {
+    function spawn(location, level, skill, oldPlayer, score, nextExtra) {
     
         var x = location.x,
             y = location.y,
@@ -103,10 +103,9 @@ Wolf.Player = (function() {
             frags : 0,
             ammo : [
             ],
-            score : 0,
-            lives : 0,
-            startScore : 0,
-            nextExtra : 0,
+            score : (score) ? score : 0,
+            lives: 0,
+            nextExtra: (nextExtra) ? nextExtra : Wolf.EXTRAPOINTS,
             items : 0, // (keys, weapon)
             weapon : 0,
             pendingWeapon : -1,
@@ -171,7 +170,7 @@ Wolf.Player = (function() {
     
 
     /**
-     * @description Copy player variables from another player object
+     * @description Copy player variables from another player object after a floor is finished, NOT after dying
      * @private
      * @param {object} player The player object
      * @param {object} copyPlayer The player object to copy from
@@ -180,7 +179,6 @@ Wolf.Player = (function() {
         player.health = copyPlayer.health;
         player.ammo = copyPlayer.ammo;
         player.score = copyPlayer.score;
-        player.startScore = copyPlayer.startScore;
         player.lives = copyPlayer.lives;
         player.previousWeapon = copyPlayer.previousWeapon;
         player.weapon = copyPlayer.weapon;
@@ -193,20 +191,17 @@ Wolf.Player = (function() {
     }
     
     /**
-     * @description Set up player for the new game
+     * @description Set up player for the new game and after dying
      * @memberOf Wolf.Player
      * @param {object} player The player object
      */
     function newGame(player) {
         player.health = 100;
         player.ammo[Wolf.AMMO_BULLETS] = 8;
-        player.score = 0;
-        player.startScore = 0;
         player.lives = 3;
         player.previousWeapon = Wolf.WEAPON_KNIFE; //gsh
         player.weapon = player.pendingWeapon = Wolf.WEAPON_PISTOL;
         player.items = Wolf.ITEM_WEAPON_1 | Wolf.ITEM_WEAPON_2;
-        player.nextExtra = Wolf.EXTRAPOINTS;
     }
 
     
@@ -425,7 +420,7 @@ Wolf.Player = (function() {
             } else {
                 self.playstate = Wolf.ex_complete;
             }
-            Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_BODY, "lsfx/040.wav", 1, Wolf.ATTN_NORM, 0 );
+            Wolf.Sound.startSound("lsfx/040.ogg" );
             
             Wolf.Game.startIntermission(game);
             
@@ -657,7 +652,7 @@ Wolf.Player = (function() {
             Wolf.Game.notify("You have died");
             player.health = 0;
             player.playstate = Wolf.ex_dead;
-            Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_BODY, "lsfx/009.wav", 1, Wolf.ATTN_NORM, 0);
+            Wolf.Sound.startSound("lsfx/009.ogg");
         }
 
         // red screen flash
@@ -773,7 +768,6 @@ Wolf.Player = (function() {
     
     return {
         spawn : spawn,
-        newGame : newGame,
         controlMovement : controlMovement,
         process : process,
         damage : damage,

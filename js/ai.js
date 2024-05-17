@@ -608,17 +608,17 @@ Wolf.AI = (function() {
 
         switch (self.type) {
             case Wolf.en_ss:
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "sfx/024.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/024.ogg", player, self);
                 break;
             case Wolf.en_gift:
             case Wolf.en_fat:
             case Wolf.en_mecha:
             case Wolf.en_hitler:
             case Wolf.en_boss:
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "sfx/022.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/022.ogg", player, self);
                 break;
             default:
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "sfx/049.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/049.ogg", player, self);
                 break;
         }
     }
@@ -883,7 +883,7 @@ Wolf.AI = (function() {
             player = game.player,
             dx, dy;
 
-        Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_VOICE, "sfx/002.wav", 1, Wolf.ATTN_NORM, 0);
+        Wolf.Sound.startSound("sfx/002.ogg", player, self);
 
         dx = Math.abs(player.position.x - self.x) - Wolf.TILEGLOBAL;
         if (dx <= Wolf.MINACTORDIST) {
@@ -965,13 +965,13 @@ Wolf.AI = (function() {
         switch(self.type) {
             case Wolf.en_death:
                 proj.type = Wolf.en_hrocket;
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "lsfx/078.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("lsfx/078.ogg", player, self);
                 break;
 
             case Wolf.en_angel:
                 proj.type = Wolf.en_spark;
                 proj.state = Wolf.st_path1;
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "lsfx/069.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("lsfx/069.ogg", player, self);
                 break;
 
             case Wolf.en_fake:
@@ -979,18 +979,18 @@ Wolf.AI = (function() {
                 proj.state = Wolf.st_path1;
                 proj.flags = Wolf.FL_NEVERMARK;
                 proj.speed = 0x1200;
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "lsfx/069.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("lsfx/069.ogg", player, self);
                 break;
 
             case Wolf.en_schabbs:
                 proj.type = Wolf.en_needle;
                 proj.state = Wolf.st_path1;
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "lsfx/008.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("lsfx/008.ogg", player, self);
                 break;
 
             default:
                 proj.type = Wolf.en_rocket;
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "lsfx/085.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("lsfx/085.ogg", player, self);
         }
         
     }
@@ -1076,7 +1076,7 @@ Wolf.AI = (function() {
         if (!projectileTryMove(self, level)) {
             if (self.type == Wolf.en_rocket || self.type == Wolf.en_hrocket ) { 
                 // rocket ran into obstacle, draw explosion!
-                Wolf.Sound.startSound(player.position, self, 1, Wolf.CHAN_WEAPON, "lsfx/086.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("lsfx/086", player, self);
                 Wolf.Actors.stateChange(self, Wolf.st_die1);
             } else {
                 Wolf.Actors.stateChange(self, Wolf.st_remove); // mark for removal
@@ -1136,7 +1136,7 @@ Wolf.AI = (function() {
     }
     
     function T_BJYell(self, game, tics) {
-        Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_VOICE, "sfx/082.wav", 1, Wolf.ATTN_NORM, 0);
+        Wolf.Sound.startSound("sfx/082.ogg");
     }
     
     function T_BJDone(self, game, tics) {

@@ -84,6 +84,16 @@ Wolf.log = function(str) {
             f = m ? "\t[" + m[1] + "]" : "";
         }
         console.log(t.toLocaleTimeString() + ": " + str + f);
+        if (Wolf.Game.getShowLog()) {
+            // fade it out in 5 seconds
+            $('.logDisplay')
+                .stop(true, true) // Stop current animation and clear queue
+                .css('opacity', '1') 
+                .text(str)
+                .animate({
+                    opacity: 0
+                }, 5000); 
+        }
     }
 };
 

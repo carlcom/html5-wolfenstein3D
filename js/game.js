@@ -24,18 +24,19 @@ Wolf.Game = (function() {
 
     var rendering = false,
         playing = false,
-        fsInit = false,
         hndRender = 0,
         hndCycle = 0,
         hndFps = 0,
-        lastFPSTime = 0,
-        lastFrame = 0,
+        perfStartTime = 0,
+        perfProcessTime = 0,
+        averageProcessTime = 0,
+        highProcessTime = 0,
         frameNum = 0,
-        cycleNum = 0,
         mouseEnabled = false,
+        showTiming = false,
+        showLog = true,
         paused = false,
         intermissionAnim = 0,
-        currentGame = null,
         levelMusic,
         processAI = true,
         keyInputActive = false,
@@ -178,10 +179,13 @@ Wolf.Game = (function() {
             }
         
             hndCycle = setTimeout(nextCycle, 1000 / 30);
-            cycleNum++;
 
             if (paused) {
                 return;
+            }
+
+            if (showTiming) {
+                perfStartTime = performance.now();
             }
             
             var player = game.player,
@@ -210,14 +214,11 @@ Wolf.Game = (function() {
 
                         if (game.player.lives > 0) {
                             lives = game.player.lives;
-                            score = game.player.startScore;
                             game.level = Wolf.Level.reload(level);
                             Wolf.Level.scanInfoPlane(game.level, game.skill); // Spawn items/guards
-                            game.player = Wolf.Player.spawn(game.level.spawn, game.level, game.skill);
+                            game.player = Wolf.Player.spawn(game.level.spawn, game.level, game.skill, 0, game.player.score, game.player.nextExtra);
                             game.player.lives = lives - 1;
-                            game.player.score = score;
-                            game.player.startScore = score;
-                            game.level.state.startTime = (new Date).getTime();
+                            game.level.state.startTime = Date.now();
                             game.level.state.elapsedTime = 0;
                         } else {
                             gameOver(game);
@@ -233,10 +234,13 @@ Wolf.Game = (function() {
             }
             Wolf.Sprites.clean(level);
             updateHUD(game, tics);
-           
+
+            if (showTiming) {
+                perfProcessTime += (performance.now() - perfStartTime);
+            }
         }
         
-        lastTimeCount = (new Date).getTime();
+        lastTimeCount = Date.now();
         nextCycle();
     }
     
@@ -326,7 +330,7 @@ Wolf.Game = (function() {
         rendering = false;
         
         $("#game .renderer").hide();
-        $("#game .fps").hide();
+      //  $("#game .fps").hide();
         $("#game .gameover").show();
         endGame();
         
@@ -372,9 +376,9 @@ Wolf.Game = (function() {
      * @returns {number} The number of tics
      */
     function calcTics() {
-        var now = (new Date).getTime(),
-            delta = (now - lastTimeCount) / 1000,
-            tics = Math.floor(ticsPerSecond * delta);
+        var now = Date.now(),
+            delta = (now - lastTimeCount) / 1000, // delta is about 0.0167 for 60fps
+            tics = (ticsPerSecond * delta) >> 0; // tics = .0167 * 70 = 1.169
 
         lastTimeCount += (tics * 1000 / ticsPerSecond) >> 0;
         
@@ -519,14 +523,22 @@ Wolf.Game = (function() {
      * @private 
      */
     function updateFPS() {
-        var now = (new Date).getTime(),
-            dt = (now - lastFPSTime) / 1000,
-            frames = frameNum - lastFrame;
+        if (playing && !paused) {
+            // perfProcessTime is in ms, with setInterval of 1000ms, perfProcessTime / 10 is the percentage of time spent processing
+            if (averageProcessTime == 0) {
+                highProcessTime = averageProcessTime = perfProcessTime / 20;
+            } else {
+                averageProcessTime = (averageProcessTime * 0.8) + (perfProcessTime / 50); // 80%+20%
+                if (averageProcessTime > highProcessTime) {
+                    highProcessTime = averageProcessTime;
+                }
+            }
 
-        lastFPSTime = now;
-        lastFrame = frameNum;
-        
-        $("#game .fps").html((frames / dt).toFixed(2));
+            //   $("#game .fps").html((frames / dt).toFixed(2)); frames usaullay 60, sometimes 59 or 61. dt is 1.0
+            $('.fps').html("<font style='color:#999'>" + highProcessTime.toFixed(2) + "%</font><br>" + averageProcessTime.toFixed(2) + "%");
+
+            perfProcessTime = 0;
+        }
     }
 
     /**
@@ -539,14 +551,13 @@ Wolf.Game = (function() {
         if (hndRender) {
             cancelAnimationFrame(hndRender);
             hndRender = 0;
-        }
-        
-        /*
-        if (!hndFps) {
+        }        
+    
+        if (showTiming && !hndFps) {
             hndFps = setInterval(updateFPS, 1000);
         }
-        $("#game .fps").show();
-        */
+
+        $("#game .fps").toggle(showTiming);
         
         Wolf.Renderer.init();
         
@@ -612,7 +623,8 @@ Wolf.Game = (function() {
             levelMusic = level.music;
             
             Wolf.Level.scanInfoPlane(level, game.skill); // Spawn items/guards
-            
+
+            highProcessTime = averageProcessTime = 0;
             /*
             game.player.position.x = 1944862;
             game.player.position.y = 2156427;
@@ -627,9 +639,7 @@ Wolf.Game = (function() {
                 
                 game.player = Wolf.Player.spawn(level.spawn, level, game.skill, game.player);
                 
-                game.player.startScore = game.player.score;
-                
-                level.state.startTime = (new Date).getTime();
+                level.state.startTime = Date.now();
                 level.state.elapsedTime = 0;
 
                 playing = true;
@@ -791,16 +801,18 @@ Wolf.Game = (function() {
             killRatio = levelState.totalMonsters ? ((levelState.killedMonsters / levelState.totalMonsters * 100) >> 0) : 0,
             secretRatio = levelState.totalSecrets ? ((levelState.foundSecrets / levelState.totalSecrets * 100) >> 0) : 0,
             treasureRatio = levelState.totalTreasure ? ((levelState.foundTreasure / levelState.totalTreasure * 100) >> 0) : 0,
-            time = levelState.elapsedTime + ((new Date).getTime() - levelState.startTime),
+            time = levelState.elapsedTime + (Date.now() - levelState.startTime),
             totalTime, i,  
             avgKill = 0, avgSecret = 0, avgTreasure = 0;
             
         playing = false;
+        averageProcessTime = highProcessTime = 0;
+
 
         Wolf.Sound.startMusic("music/URAHERO.ogg");
         
         $("#game .renderer").hide();
-        $("#game .fps").hide();
+    //    $("#game .fps").hide();
         $("#game .intermission .digit").hide();
         $("#game .intermission").show();
         
@@ -895,7 +907,7 @@ Wolf.Game = (function() {
         }
         
         function anim() {
-            var now = (new Date).getTime(),
+            var now = Date.now(),
                 bjFrame = Math.floor(now / 500) % 2;
 
             $("#game .intermission .bj").css({
@@ -1202,11 +1214,9 @@ Wolf.Game = (function() {
      */
     function togglePause() {
         paused = !paused;
-        if (paused) {
-            Wolf.Sound.pauseMusic(true);
-        } else {
-            Wolf.Sound.pauseMusic(false);
-            lastTimeCount = (new Date).getTime();
+        Wolf.Sound.pauseMusic(paused);
+        if (!paused) {
+            lastTimeCount = Date.now();
         }
         $("#game .renderer div.pause.overlay").toggle(paused);
     }
@@ -1218,6 +1228,30 @@ Wolf.Game = (function() {
     function isMouseEnabled() {
         return mouseEnabled;
     }
+    function getShowTiming() {
+        return showTiming;
+    } 
+
+    function getShowLog() {
+        return showLog;
+    }
+    function setShowTiming(show) {
+        $("#game .fps").toggle(show);
+        showTiming = show;
+        if (showTiming) {
+            if (!hndFps && playing) {
+                hndFps = setInterval(updateFPS, 1000);
+            }
+        } else {
+            clearInterval(hndFps);
+            hndFps = highProcessTime = 0;
+        }
+    }
+    function setShowLog(show) {
+        $("#game .logDisplay").toggle(show);
+        showLog = show;
+    }
+
 
     function getControls() {
         var c = {};
@@ -1299,7 +1333,11 @@ Wolf.Game = (function() {
         startDamageFlash : startDamageFlash,
         startBonusFlash : startBonusFlash,
         enableMouse : enableMouse,
-        isMouseEnabled : isMouseEnabled,
+        isMouseEnabled: isMouseEnabled,
+        getShowTiming: getShowTiming,
+        setShowTiming: setShowTiming, 
+        getShowLog: getShowLog,
+        setShowLog: setShowLog,
         isPlaying : isPlaying,
         notify : notify,
         isFullscreen : isFullscreen,

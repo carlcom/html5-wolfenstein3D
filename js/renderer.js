@@ -4,7 +4,8 @@ Wolf.setConsts({
     ISSAFARI            : /safari/.test(navigator.userAgent.toLowerCase()),
     ISFIREFOX           : /firefox/.test(navigator.userAgent.toLowerCase()),
     ISXP                : /windows nt 5\./.test(navigator.userAgent.toLowerCase()),
-    ISWEBKIT            : /webkit/.test(navigator.userAgent.toLowerCase())
+    ISWEBKIT            : /webkit/.test(navigator.userAgent.toLowerCase()),
+ //   ISEDGE              : /Edg/.test(navigator.userAgent)
 });
 Wolf.setConsts({
     VIEW_DIST           : (Wolf.XRES / 2) / Math.tan((Wolf.FOV_RAD / 2)),
@@ -18,19 +19,15 @@ Wolf.Renderer = (function() {
         useBackgroundImage = Wolf.ISWEBKIT,
         texturePath = "art/walls-shaded/" + Wolf.TEXTURERESOLUTION + "/",
         spritePath = "art/sprites/" + Wolf.TEXTURERESOLUTION + "/",
-        sprites = [],
         maxDistZ = 64 * 0x10000,
         hasInit = false;
         visibleSprites = [];
         
-    var TILESHIFT = Wolf.TILESHIFT,
-        TILEGLOBAL = Wolf.TILEGLOBAL,
+    var TILEGLOBAL = Wolf.TILEGLOBAL,
         TRACE_HIT_VERT = Wolf.TRACE_HIT_VERT,
         TRACE_HIT_DOOR = Wolf.TRACE_HIT_DOOR,
-        WALL_TILE = Wolf.WALL_TILE,
         DOOR_TILE = Wolf.DOOR_TILE,
         TEX_PLATE = Wolf.TEX_PLATE,
-        TILE2POS = Wolf.TILE2POS,
         POS2TILE = Wolf.POS2TILE,
         VIEW_DIST = Wolf.VIEW_DIST,
         SLICE_WIDTH = Wolf.SLICE_WIDTH,
@@ -40,11 +37,9 @@ Wolf.Renderer = (function() {
         YRES = Wolf.YRES,
         MINDIST = Wolf.MINDIST,
         cos = Math.cos,
-        sin = Math.sin,
         tan = Math.tan,
         atan2 = Math.atan2,
-        round = Math.round,
-        sqrt = Math.sqrt;
+        round = Math.round;
 
     function init() {
         var image, slice, x;
@@ -62,6 +57,7 @@ Wolf.Renderer = (function() {
             slice.css({
                 position : "absolute",
                 width : Wolf.SLICE_WIDTH + "px",
+             //   width : Wolf.SLICE_WIDTH + ((Wolf.ISEDGE && (x-126)%150 == 0) ? 0.01 : 0) + "px", // Edge (at 134% zoom) was computing smaller width that caused a .5px opening in the wall every 150px. 
                 height : Wolf.YRES + "px",
                 left : x + "px",
                 top : 0,

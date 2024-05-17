@@ -21,38 +21,45 @@ Wolf.Input = (function() {
             keys = [];
             
             $(document)
-                .on("keydown", function(e) {
+                .on("keydown", function (e) {
                     e.preventDefault();
-                    
+
                     if (!Wolf.Game.isPlaying()) {
                         return;
                     }
-                    
+
                     keys[e.keyCode] = true;
                     if (bindings[e.keyCode]) {
-                        for (var i=0,n=bindings[e.keyCode].length;i<n;i++) {
+                        for (var i = 0, n = bindings[e.keyCode].length; i < n; i++) {
                             bindings[e.keyCode][i](e);
                         }
                     }
                 })
-                .on("keyup", function(e) {
+                .on("keyup", function (e) {
                     e.preventDefault();
                     if (!Wolf.Game.isPlaying()) {
                         return;
                     }
                     keys[e.keyCode] = false;
-                })
-                .on("keypress", function(e) {
+                });
+            /*    .on("keypress", function(e) {
                     e.preventDefault();
                 })
                 .on("contextmenu", function(e) {
                     e.preventDefault();
                 })
-                
-            $("#game")
-                .on("onrightclick", function (e) {
+                .on("onrightclick", function(e) {
                     e.preventDefault();
                 })
+                .on("mousedown", function(e) {
+                    window.focus();
+                    e.preventDefault();
+                })
+                .on("mouseup", function(e) {
+                    e.preventDefault();
+                }); */
+                
+            $("#game")
                 .on("mousedown", function(e) {
                     if (hasFocus) {
                         if (e.which == 1) {

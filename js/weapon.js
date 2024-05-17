@@ -15,7 +15,7 @@ Wolf.Weapon = (function() {
             damage,
             guard;
 
-        Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_WEAPON, "lsfx/023.wav", 1, Wolf.ATTN_NORM, 0);
+        Wolf.Sound.startSound("lsfx/023.ogg");
 
         // actually fire
         dist = 0x7fffffff;
@@ -64,15 +64,15 @@ Wolf.Weapon = (function() {
 
         switch (player.weapon) {
             case Wolf.WEAPON_PISTOL:
-                Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_WEAPON, "sfx/012.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/012.ogg");
                 break;
 
             case Wolf.WEAPON_AUTO:
-                Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_WEAPON, "sfx/011.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/011.ogg");
                 break;
 
             case Wolf.WEAPON_CHAIN:
-                Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_WEAPON, "sfx/013.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("sfx/013.ogg");
                 break;
         }
 
@@ -113,7 +113,7 @@ Wolf.Weapon = (function() {
             Wolf.Raycaster.trace(level, null, tracePoint);
 
             if (tracePoint.flags & Wolf.TRACE_HIT_DOOR) {
-                Wolf.Sound.startSound(null, null, 0, Wolf.CHAN_AUTO, "lsfx/028.wav", 1, Wolf.ATTN_NORM, 0);
+                Wolf.Sound.startSound("lsfx/028.ogg");
             }
             
             return;

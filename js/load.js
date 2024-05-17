@@ -39,7 +39,7 @@ var files = [
 // only non-essential files here
 var files2 = [
     "preload!art/menubg_episodes.png",
-    "preload!art/menuitems_episodes.png",
+    "preload!art/menuitems_episodes_lightside.png",
     "preload!art/menubg_skill.png",
     "preload!art/menubg_levels.png",
     "preload!art/menuitems_levels.png",

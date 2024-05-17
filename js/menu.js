@@ -1,19 +1,18 @@
 /** 
  * @namespace 
  * @description Game menu management
+ * Only one menu can be active at a time. Each menu can have an "active" li, even if the menu is not active.
  */
 Wolf.Menu = (function() {
     var setupDone = false,
         menuInputActive = false,
-        activeIndex = 0,
-        activeMouseItem = null,
+        audioEnabled = false,
+        activeMenu,
         activeEpisode,
         messageBlink,
-        activeMessage,
         activeSkill;
         
     var keySprites = {}, 
-        i,
         keySpriteNames = [
             "BLANK", 
             "QUESTION",
@@ -73,24 +72,34 @@ Wolf.Menu = (function() {
             "Z"
         ];
         
-    for (i=0;i<keySpriteNames.length;i++) {
-        if (keySpriteNames[i] !== "") {
-            keySprites[keySpriteNames[i]] = i;
+    keySpriteNames.forEach(function (name, index) {
+        if (name !== "") {
+            keySprites[name] = index;
+        }
+    });
+
+
+    function playSound(file) {
+        if (audioEnabled) {
+            Wolf.Sound.startSound(file);
         }
     }
-    
-    function playSound(file) {
-        Wolf.Sound.startSound(null, null, 1, Wolf.CHAN_AUTO, file, 1, Wolf.ATTN_NORM, 0);
+
+    // Slider color split 
+    function colorme(s) {
+        var val = s.val();
+        s.context.style.background = 'linear-gradient(to right, #ff0 0%, #ff0 ' + val + '%, #111 ' + val + '%, #111 100%)';
     }
 
     function setActiveItem(item) {
-        playSound("lsfx/005.wav");
+        playSound("lsfx/005.ogg");
         
-        $("#menu div.menu.active li").removeClass("active");
+        activeMenu.find("li").removeClass("active");
         item.addClass("active");
-        
-        if ($("#menu div.menu.active").hasClass("skill")) {
-            $("#menu div.menu.active div.face")
+        item.find("input[type='range']").focus();
+
+        if (activeMenu.hasClass("skill")) {
+            activeMenu.find("div.face")
                 .removeClass()
                 .addClass("face " + item.data("skill"));
         }
@@ -109,56 +118,86 @@ Wolf.Menu = (function() {
             if (!menuInputActive) {
                 return;
             }
-            
-            var oldActive = activeIndex;
-            switch (e.keyCode) {
-                case 38:
-                    activeIndex--;
-                    activeMouseItem = null;
-                    break;
-                case 40:
-                    activeIndex++;
-                    activeMouseItem = null;
-                    break;
-                case 13:
-                    if (activeMouseItem) {
-                        activeMouseItem.trigger("click");
-                    } else {
-                        $("#menu div.menu.active li").eq(activeIndex).trigger("click");
+
+            var activeIndex = activeMenu.find("li.active").first().index();
+
+            switch (e.which) {
+                case 37: // Left arrow
+                case 39: // Right arrow: if a range input is active, slide it
+                    if (activeMenu.hasClass("levels")) {
+                        activeIndex += 5; // half of the levels
+                        setLevel();
+                    }
+                    else {
+                        // Check if the active element is a range input
+                        var activeElement = document.activeElement;
+
+                        if (activeElement && activeElement.type === 'range') {
+                            var currentValue = parseInt($(activeElement).val(), 10);
+
+                            switch (e.which) {
+                                case 37: // Left arrow, lower value by 5
+                                    $(activeElement).val(Math.max(currentValue - 5, 0)).trigger('input');
+                                    break;
+                                case 39:
+                                    $(activeElement).val(Math.min(currentValue + 5, 100)).trigger('input');
+                                    break;
+                            }
+                        }
                     }
                     break;
+                case 38: // Up
+                case 40: // Dpwn
+                    activeIndex += e.which - 39;
+                    if (activeMenu.hasClass("episodes")) { // only scroll with keys, not mouse
+                        var itemTop = setLevel().position().top;
+                        var activeUL = activeMenu.find("ul");
+                        var scrollPosition = itemTop - activeUL.position().top + activeUL.scrollTop();
+
+                        activeUL.scrollTop(scrollPosition);
+                    }
+                    else {
+                        setLevel();
+                    }
+                    break;
+                case 13:
+                case 32:
+                    activeMenu.find("li").eq(activeIndex).trigger("click");
+                    break;
                 case 27: // ESC
-                    var back = $("#menu div.menu.active").data("backmenu");
+                    var back = activeMenu.data("backmenu");
                     if (back) {
-                        playSound("lsfx/039.wav");
+                        playSound("lsfx/039.ogg");
                         show(back);
                     }
                     return;
             }
-            if (oldActive != activeIndex) {
-                var items = $("#menu div.menu.active li:not(.hidden)");
+
+            function setLevel() {
+                var items = activeMenu.find("li:not(.hidden)");
                 if (activeIndex < 0) {
                     activeIndex += items.length;
                 }
                 activeIndex %= items.length;
                 setActiveItem(items.eq(activeIndex));
+                return items.eq(activeIndex);
             }
         });
         
-        $("#menu li").mouseover(function() {
+        $("#menu li").mouseover(function () {
             if (!menuInputActive) {
                 return;
             }
-            activeMouseItem = $(this);
             setActiveItem($(this));
         });
 
-        $("#menu li").on("click", function(e) {
+        $("#menu li").on("click", function (e) {
+            audioEnabled = true;
             if (!menuInputActive) {
                 return;
             }
 
-            playSound("lsfx/032.wav");
+            playSound("lsfx/032.ogg");
             
             var $this = $(this),
                 sub = $this.data("submenu");
@@ -166,27 +205,7 @@ Wolf.Menu = (function() {
                 show(sub);
                 e.stopPropagation();
             }
-            
-            if ($this.hasClass("sfxon")) {
-                $("div.light", $this).addClass("on");
-                $("#menu li.sfxoff div.light").removeClass("on");
-                Wolf.Sound.toggleSound(true);
-            }
-            if ($this.hasClass("sfxoff")) {
-                $("div.light", $this).addClass("on");
-                $("#menu li.sfxon div.light").removeClass("on");
-                Wolf.Sound.toggleSound(false);
-            }
-            if ($this.hasClass("musicon")) {
-                $("div.light", $this).addClass("on");
-                $("#menu li.musicoff div.light").removeClass("on");
-                Wolf.Sound.toggleMusic(true);
-            }
-            if ($this.hasClass("musicoff")) {
-                $("div.light", $this).addClass("on");
-                $("#menu li.musicon div.light").removeClass("on");
-                Wolf.Sound.toggleMusic(false);
-            }
+
             if ($this.hasClass("mouseenabled")) {
                 var mouseOn = Wolf.Game.isMouseEnabled();
                 $("div.light", $this).toggleClass("on", !mouseOn);
@@ -196,6 +215,36 @@ Wolf.Menu = (function() {
             if ($this.hasClass("customizekeys")) {
                 customizeKeys($this);
                 e.stopPropagation();
+            } 
+
+            if ($this.hasClass("showtiming")) {
+                var showTiming = Wolf.Game.getShowTiming();
+                $("div.light", $this).toggleClass("on", !showTiming);
+                Wolf.Game.setShowTiming(!showTiming);
+            }
+
+            if ($this.hasClass("showLog")) {
+                var showLog = Wolf.Game.getShowLog();
+                $("div.light", $this).toggleClass("on", !showLog);
+                Wolf.Game.setShowLog(!showLog);
+            }
+            
+        });
+
+
+        $("#menu div.menu.sound li input[type='range']").on("input", function (e) {
+            if (!menuInputActive) {
+                return;
+            }
+            var $this = $(this)
+            if ($this.hasClass("fx")) {
+                colorme($this);
+                Wolf.Sound.setFxVolume(this.value);
+            }
+
+            if ($this.hasClass("music")) {
+                colorme($this);
+                Wolf.Sound.setMusicVolume(this.value);
             }
 
         });
@@ -332,7 +381,7 @@ Wolf.Menu = (function() {
             if (isBinding) {
                 // look for key in bindable key codes. TODO: LUT?
                 for (i=2;i<keySpriteNames.length;i++) {
-                    if (Wolf.Keys[keySpriteNames[i]] == e.keyCode) {
+                    if (Wolf.Keys[keySpriteNames[i]] == e.which) {
                         bindKey(current, keySpriteNames[i]);
                         isBinding = false;
                         clearInterval(blinkInterval);
@@ -343,7 +392,7 @@ Wolf.Menu = (function() {
                 return;
             }
             
-            switch (e.keyCode) {
+            switch (e.which) {
                 case 39: // right
                     selectKey(current + 1);
                     break;
@@ -387,12 +436,16 @@ Wolf.Menu = (function() {
             setCustomizeKey(keys[i], controls[keys[i]][0])
         }
     }
-    
+
+    function initSoundMenu() {
+        // Set the sliders to the initial volumes
+        $('#slidereffects').val(Wolf.Sound.getFxVolume()).trigger('input');
+        $('#slidermusic').val(Wolf.Sound.getMusicVolume()).trigger('input');
+     }
     function showMessage(name, blink, onclose) {
         var box, 
             blinkOn = false;
         
-        activeMessage = name;
         menuInputActive = false;
         
         if (messageBlink) {
@@ -418,7 +471,7 @@ Wolf.Menu = (function() {
         }
         
         function close(value) {
-            playSound("lsfx/039.wav");
+            playSound("lsfx/039.ogg");
             $(document).off("keydown", keyHandler);
             $("#menu .message." + name).hide();
             if (messageBlink) {
@@ -434,7 +487,7 @@ Wolf.Menu = (function() {
         
         
         function keyHandler(e) {
-            switch (e.keyCode) {
+            switch (e.which) {
                 case 27: // ESC
                 case 78: // N
                     close(false);
@@ -455,13 +508,12 @@ Wolf.Menu = (function() {
      * @memberOf Wolf.Menu
      */
     function show(menuName) {
-        var musicOn, soundOn, mouseOn;
+        var mouseOn;
         
         if (!setupDone) {
             setupEvents();
             setupDone = true;
         }
-        Wolf.Sound.startMusic("music/WONDERIN.ogg");
         
         menuName = menuName || "main";
 
@@ -469,66 +521,77 @@ Wolf.Menu = (function() {
             if (Wolf.Game.isPlaying()) {
                 $("#menu div.menu.main li.resumegame")
                     .removeClass("hidden")
+                    .addClass("active")
                     .show();
+                $("#menu div.menu.main li").first()
+                    .removeClass("active")
             } else {
                 $("#menu div.menu.main li.resumegame")
                     .addClass("hidden")
                     .hide();
             }
         }
-        
-        if (menuName == "customize") {
-            initCustomizeMenu();
-        }
-        
-        if (menuName == "episodes") {
-            $("#menu div.menu.episodes li")
-                .removeClass("hidden")
-                .show();
-                
-            if (!Wolf.Episodes[0].enabled) {
-                $("#menu div.menu.episodes li.episode-0")
-                    .addClass("hidden")
-                    .hide();
+
+        else {
+            Wolf.Sound.startMusic("music/WONDERIN.ogg"); // Ensure user has interacter with the page
+            if (menuName == "customize") {
+                initCustomizeMenu();
             }
-            if (!Wolf.Episodes[1].enabled) {
-                $("#menu div.menu.episodes li.episode-1")
-                    .addClass("hidden")
-                    .hide();
+
+            else if (menuName == "sound") {
+                initSoundMenu();
             }
-            if (!Wolf.Episodes[2].enabled) {
-                $("#menu div.menu.episodes li.episode-2")
-                    .addClass("hidden")
-                    .hide();
+
+
+            else if (menuName == "episodes") {
+                $("#menu div.menu.episodes li")
+                    .removeClass("hidden")
+                    .show();
+
+                if (!Wolf.Episodes[0].enabled) {
+                    $("#menu div.menu.episodes li.episode-0")
+                        .addClass("hidden")
+                        .hide();
+                }
+                if (!Wolf.Episodes[1].enabled) {
+                    $("#menu div.menu.episodes li.episode-1")
+                        .addClass("hidden")
+                        .hide();
+                }
+                if (!Wolf.Episodes[2].enabled) {
+                    $("#menu div.menu.episodes li.episode-2")
+                        .addClass("hidden")
+                        .hide();
+                }
             }
-        }
-        
-        if (menuName == "sound") {
-            musicOn = Wolf.Sound.isMusicEnabled();
-            soundOn = Wolf.Sound.isSoundEnabled();
-            $("#menu li.sfxoff div.light").toggleClass("on", !soundOn);
-            $("#menu li.sfxon div.light").toggleClass("on", soundOn);
-            $("#menu li.musicoff div.light").toggleClass("on", !musicOn);
-            $("#menu li.musicon div.light").toggleClass("on", musicOn);
-        }
-        
-        if (menuName == "control") {
-            mouseOn = Wolf.Game.isMouseEnabled();
-            $("#menu li.mouseenabled div.light").toggleClass("on", mouseOn);
+
+            else if (menuName == "control") {
+                $("#menu li.mouseenabled div.light").toggleClass("on", Wolf.Game.isMouseEnabled());
+            }
+
+            else if (menuName == "other") {
+                $("#menu li.showtiming div.light").toggleClass("on", Wolf.Game.getShowTiming());
+                $("#menu li.showLog div.light").toggleClass("on", Wolf.Game.getShowLog());
+            }
         }
         
         if ($("#menu").data("menu")) {
             $("#menu").removeClass($("#menu").data("menu"));
         }
         $("#menu div.menu").removeClass("active").hide();
-        $("#menu li").removeClass("active");
         $("#menu").data("menu", menuName).addClass(menuName).show();
         $("#menu div.menu." + menuName).addClass("active").show();
-        $("#menu div.menu." + menuName + " ul li").first().addClass("active");
+      
+        activeMenu = $("#menu div.menu." + menuName);
+        var activeItem = activeMenu.find("li.active:not(.hidden)").first();
+
+        if (activeItem.length === 0) {
+            activeItem = activeMenu.find("li").first();
+        }
+
+        setActiveItem(activeItem);
         $("#menu").focus();
         
-        activeIndex = 0;
-        activeMouseItem = null;
         menuInputActive = true;
     }
     
@@ -568,7 +631,7 @@ Wolf.Menu = (function() {
         }
         
         function keyHandler(e) {
-            switch (e.keyCode) {
+            switch (e.which) {
                 case 39: // right
                     show(1);
                     break;
